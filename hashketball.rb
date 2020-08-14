@@ -1,4 +1,5 @@
-# Write your code below game_hash
+require "pry"
+
 def game_hash
   {
     home: {
@@ -126,4 +127,120 @@ def game_hash
   }
 end
 
-# Write code here
+def find_team(stats, name)
+  stats.keys.find {|team| stats[team][:team_name] == name}
+end
+
+def num_points_scored(name)
+  # knows the number of points scored by each player
+  
+  stats = game_hash
+  
+  stats.each do |team, team_stats|
+    team_stats[:players].each do |player_hash|
+      if player_hash[:player_name] == name
+        return player_hash[:points]
+      end
+    end
+  end
+  
+  return "Sorry, the player was not found"
+  
+end
+
+def shoe_size(name)
+  # knows the shoe size of each player
+  
+  stats = game_hash
+  
+  stats.each do |team, team_stats|
+    team_stats[:players].each do |player_hash|
+      if player_hash[:player_name] == name
+        return player_hash[:shoe]
+      end
+    end
+  end
+  
+  return "Sorry, the player was not found"
+  
+end
+
+def team_colors(name)
+  # knows the Brooklyn Nets colors are Black and White
+  # knows the Charlotte Hornets colors are Turquoise and Purple
+  
+  stats = game_hash
+  
+  team = find_team(stats, name)
+  
+  stats[team][:colors]
+  
+end
+
+def team_names
+  # returns the team names
+  
+  stats = game_hash
+  
+  stats.keys.collect {|team| stats[team][:team_name]}
+  
+end
+
+def player_numbers(name)
+  # returns the player jersey numbers
+  
+  stats = game_hash
+  
+  team = find_team(stats, name)
+  
+  stats[team][:players].collect {|player| player[:number]}
+  
+end
+
+def player_stats(name)
+  # returns all stats for a given player
+  
+  stats = game_hash
+  
+  stats.keys.each do |team|
+    stats[team][:players].each do |player|
+      if player[:player_name] == name
+        return player
+      end
+    end
+  end
+  
+  return "Sorry, the player was not found"
+  
+end
+
+def big_shoe_rebounds
+  # returns the number of rebounds of the player with the biggest shoe size
+  
+  stats = game_hash
+  
+  biggest = {
+    player_name: "",
+    shoe: 0,
+    rebounds: 0
+  }
+  
+  stats.keys.each do |team|
+    
+    stats[team][:players].each do |player|
+      
+      if player[:shoe] > biggest[:shoe]
+        
+        biggest[:player_name] = player[:player_name]
+        biggest[:shoe] = player[:shoe]
+        biggest[:rebounds] = player[:rebounds]
+        
+      end
+    end
+  end
+  
+  biggest[:rebounds]
+  
+end
+
+puts big_shoe_rebounds
