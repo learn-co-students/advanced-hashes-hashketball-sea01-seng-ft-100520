@@ -127,41 +127,66 @@ def game_hash
   }
 end
 
-def find_team(stats, name)
-  stats.keys.find {|team| stats[team][:team_name] == name}
+def player_stats(name)
+  # returns all stats for a given player
+  
+  game_hash.each do |team, info|
+    info[:players].each do |player|
+      if player[:player_name] == name
+        return player
+      end
+    end
+  end
+end
+
+def final_score
+  {
+  :home => {
+    team_name: game_hash[:home][:team_name],
+    team_score: game_hash[:home][:players].sum {|player| player[:points]}
+  },
+  :away => {
+    team_name: game_hash[:away][:team_name],
+    team_score: game_hash[:away][:players].sum {|player| player[:points]}
+  }}
+end
+
+def find_team(name)
+  game_hash.keys.find {|team| game_hash[team][:team_name] == name}
+end
+
+def all_player_stats
+  players = []
+  game_hash.each do |team, info|
+    info[:players].each do |player_hash|
+      players << player_hash
+    end
+  end
+  players
+end
+
+def team_stats(name)
+  
+  players = []
+  game_hash[find_team(name)][:players].each do |player_hash|
+    players << player_hash
+  end
+  
+  players
+  
 end
 
 def num_points_scored(name)
   # knows the number of points scored by each player
   
-  stats = game_hash
-  
-  stats.each do |team, team_stats|
-    team_stats[:players].each do |player_hash|
-      if player_hash[:player_name] == name
-        return player_hash[:points]
-      end
-    end
-  end
-  
-  return "Sorry, the player was not found"
+  player_stats(name)[:points]
   
 end
 
 def shoe_size(name)
   # knows the shoe size of each player
   
-  stats = game_hash
-  
-  stats.each do |team, team_stats|
-    team_stats[:players].each do |player_hash|
-      if player_hash[:player_name] == name
-        return player_hash[:shoe]
-      end
-    end
-  end
-  
-  return "Sorry, the player was not found"
+  player_stats(name)[:shoe]
   
 end
 
@@ -169,55 +194,30 @@ def team_colors(name)
   # knows the Brooklyn Nets colors are Black and White
   # knows the Charlotte Hornets colors are Turquoise and Purple
   
-  stats = game_hash
+  team = find_team(name)
   
-  team = find_team(stats, name)
-  
-  stats[team][:colors]
+  game_hash[team][:colors]
   
 end
 
 def team_names
   # returns the team names
   
-  stats = game_hash
-  
-  stats.keys.collect {|team| stats[team][:team_name]}
+  game_hash.keys.collect {|team| game_hash[team][:team_name]}
   
 end
 
 def player_numbers(name)
   # returns the player jersey numbers
   
-  stats = game_hash
+  team = find_team(name)
   
-  team = find_team(stats, name)
-  
-  stats[team][:players].collect {|player| player[:number]}
-  
-end
-
-def player_stats(name)
-  # returns all stats for a given player
-  
-  stats = game_hash
-  
-  stats.keys.each do |team|
-    stats[team][:players].each do |player|
-      if player[:player_name] == name
-        return player
-      end
-    end
-  end
-  
-  return "Sorry, the player was not found"
+  game_hash[team][:players].collect {|player| player[:number]}
   
 end
 
 def big_shoe_rebounds
   # returns the number of rebounds of the player with the biggest shoe size
-  
-  stats = game_hash
   
   biggest = {
     player_name: "",
@@ -225,15 +225,17 @@ def big_shoe_rebounds
     rebounds: 0
   }
   
-  stats.keys.each do |team|
+  game_hash.each do |team, info|
     
-    stats[team][:players].each do |player|
+    info[:players].each do |player|
       
       if player[:shoe] > biggest[:shoe]
         
-        biggest[:player_name] = player[:player_name]
-        biggest[:shoe] = player[:shoe]
-        biggest[:rebounds] = player[:rebounds]
+        biggest = {
+          player_name: player[:player_name],
+          shoe: player[:shoe],
+          rebounds: player[:rebounds]
+        }
         
       end
     end
@@ -243,4 +245,52 @@ def big_shoe_rebounds
   
 end
 
-puts big_shoe_rebounds
+def most_points_scored(stats = all_player_stats)
+  # which player had the most points?
+  
+  player_hash = stats.max {|player| player[:points]}
+  
+  player_hash[:player_name]
+  
+end
+
+def winning_team
+  # which team had the most points
+  
+  final_score[:home][:team_score] > final_score[:away][:team_score] ? final_score[:home][:team_name]: final_score[:away][:team_name]
+  
+end
+
+def player_with_longest_name
+  # which player has the longest name?
+  
+  max_name_length = 0
+  max_name_player = ""
+  
+  all_player_stats.each do |player_hash|
+    if player_hash[:player_name].length > max_name_length
+      max_name_length = player_hash[:player_name].length
+      max_name_player = player_hash[:player_name]
+    end
+  end
+  
+  max_name_player
+    
+end
+
+def long_name_steals_a_ton?
+  # returns true if player with longest name had the most steals
+  
+  most_steals = 0
+  most_steals_player = ""
+  
+  all_player_stats.each do |hash|
+    if hash[:steals] > most_steals
+      most_steals = hash[:steals]
+      most_steals_player = hash[:player_name]
+    end
+  end
+  
+  player_with_longest_name == most_steals_player
+  
+end
