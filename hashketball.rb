@@ -187,7 +187,7 @@ def player_stats(name)
 
       game_hash[side][attribute].each do |player|
         next unless player[:player_name] == name
-
+        stats_hash
         stats_hash = player.delete_if do |k, _v|
           k == :player_name
         end
