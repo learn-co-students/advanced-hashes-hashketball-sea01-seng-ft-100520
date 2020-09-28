@@ -129,46 +129,42 @@ end
 # Write code here
 
 def num_points_scored(name)
-  game_hash.each do |side, team|
-    team.each do |attribute, data|
-      next unless attribute == :players
-
-      data.each do |player|
-        return player[:points] if player[:player_name] == name
+  game_hash.each do |side, keys|
+    keys[:players].each do |player|
+      if player[:player_name] == name
+        return player[:points]
       end
     end
   end
 end
 
 def shoe_size(name)
-  game_hash.each do |side, team|
-    team.each do |attribute, data|
-      next unless attribute == :players
-
-      data.each do |player|
-        return player[:shoe] if player[:player_name] == name
+  game_hash.each do |side, keys|
+    keys[:players].each do |player|
+      if player[:player_name] == name
+        return player[:shoe]
       end
-    end
+    end    
   end
 end
 
 def team_colors(team_name)
-  game_hash.each do |side, team|
-    return game_hash[side][:colors] if team[:team_name] == team_name
+  game_hash.each do |side, keys|
+    return game_hash[side][:colors] if keys[:team_name] == team_name
   end
 end
 
 def team_names
-   game_hash.collect do |side, team|
-    team[:team_name]
+   game_hash.collect do |side, keys|
+    keys[:team_name]
   end
 end
 
 def player_numbers(team_name)
   numbers = []
-  game_hash.each do |side, team|
-    next unless team[:team_name] == team_name
-    team.each do |attribute, data| 
+  game_hash.each do |side, keys|
+    next unless keys[:team_name] == team_name
+    keys.each do |attribute, data| 
       next unless attribute == :players
       
       data.each do |data|
@@ -180,19 +176,26 @@ def player_numbers(team_name)
 end
 
 def player_stats(name)
-  stats_hash = {}
-  game_hash.collect do |side, team|
-    team.each do |attribute, _data|
-      next unless attribute == :players
+  game_hash.each do |side, keys|
+    keys[:players].each do |player|  
+      if player[:player_name] == name
+        return player
+      end
+    end  
+  end    
+end
 
-      game_hash[side][attribute].each do |player|
-        next unless player[:player_name] == name
-        stats_hash
-        stats_hash = player.delete_if do |k, _v|
-          k == :player_name
-        end
+def big_shoe_rebounds
+  biggest = 0
+  rebounds = 0
+  game_hash.each do |side, keys|
+    keys[:players].each do |player|
+      size = player[:shoe]
+      if size > biggest
+        biggest = size
+        rebounds = player[:rebounds]
       end
     end
   end
-  stats_hash
+  rebounds
 end
